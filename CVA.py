@@ -4,4 +4,4 @@ class CVA:
         self.after = after
         self.before = before
     def process(self):
-        print("123")
+        print("start")
