@@ -1,8 +1,10 @@
 import numpy as np
 from scipy.linalg import inv, sqrtm, eig
 import matplotlib.pyplot as pyplot
+import numpy.matlib as nplib
 class MAD:
     def __init__(self,after,before):
+        print(print(np.__version__))
         self.after = after
         self.before = before
     def propess(self):
@@ -34,10 +36,10 @@ class MAD:
         before_mean = np.mean(before, axis=1)
         before_var = np.std(before, axis=1)
 
-        # for i in range(bands):
-        #     #test = after[:, i] - after_mean[i]
-        #     after[i,:] = (after[i,:]-after_mean[i])/after_var[i]
-        #     before[i,:] = (before[i,:]-before_mean[i])/before_var[i]
+        for i in range(bands):
+            #test = after[:, i] - after_mean[i]
+            after[i,:] = (after[i,:]-after_mean[i])/after_var[i]
+            before[i,:] = (before[i,:]-before_mean[i])/before_var[i]
 
         cov_aa_mari = np.cov(after)
         cov_aa_mat_i = np.linalg.inv(cov_aa_mari)
@@ -78,7 +80,8 @@ class MAD:
         var_mad = np.zeros(i)
         for k in range(i):
             var_mad[k] = np.var(MAD[k])
-        var_mad = np.transpose(np.matlib.repmat(var_mad, j, 1), (1, 0))
+
+        var_mad = np.transpose(nplib.repmat(var_mad, j, 1), (1, 0))
         res = MAD * MAD / var_mad
         T = res.sum(axis=0)
         # T = np.zeros(j)
@@ -98,3 +101,18 @@ class MAD:
         pyplot.show()
         # scipy.misc.imsave('c.jpg', img)
         print(center)
+import gdal
+if __name__=="__main__":
+    dataset_after = gdal.Open(r"F:\变化检测数据\A1_clip.tif")
+    im_width = dataset_after.RasterXSize  # 栅格矩阵的列数
+    im_height = dataset_after.RasterYSize  # 栅格矩阵的行数
+    im_bands = dataset_after.RasterCount  # 波段数
+    after = np.transpose(dataset_after.ReadAsArray(0, 0, im_width, im_height), (1, 2, 0))[0:5558, 0:5314]  # 获取数据
+
+    dataset_before = gdal.Open(r"F:\变化检测数据\B1_clip.tif")
+    im_width = dataset_before.RasterXSize  # 栅格矩阵的列数
+    im_height = dataset_before.RasterYSize  # 栅格矩阵的行数
+    im_bands = dataset_before.RasterCount  # 波段数
+    before = np.transpose(dataset_before.ReadAsArray(0, 0, im_width, im_height), (1, 2, 0))[0:5558, 0:5314]  # 获取数据
+    mad = MAD(after,before)
+    mad.propess()
