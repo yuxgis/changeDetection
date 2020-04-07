@@ -18,7 +18,7 @@ class BalanceBCELoss(nn.Module):
             one_count = torch.sum(batch == 1)
             zero_weight = zero_count.float() / (zero_count + one_count)
             one_weight = one_count.float() / (zero_count + one_count)
-            pix_weight[i][batch == 0.] = zero_weight
-            pix_weight[i][batch == 1.] = one_weight
+            pix_weight[i][batch == 0.] = one_weight
+            pix_weight[i][batch == 1.] = zero_weight
         loss = nn.BCELoss(weight=pix_weight)(predict,target)
         return loss
